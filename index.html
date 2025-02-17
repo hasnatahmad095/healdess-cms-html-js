@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>About Us</title>
+    <style>
+      #loader {
+        font-size: 18px;
+        text-align: center;
+        margin: 20px;
+      }
+      #content {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="loader">Loading...</div>
+    <!-- Loader -->
+
+    <div id="content">
+      <h1 id="title"></h1>
+      <h2 id="main-heading"></h2>
+      <p id="description"></p>
+      <img id="banner-image" src="" alt="Banner Image" width="500" />
+
+      <h2 id="mission-heading"></h2>
+      <div id="mission-description"></div>
+
+      <h2 id="accordion-heading"></h2>
+      <div id="accordion"></div>
+    </div>
+
+    <script>
+      document.getElementById("loader").style.display = "block"; 
+
+      fetch("https://api.theseventhmove.ae/wp-json/wp/v2/pages/316")
+        .then((response) => response.json()) 
+        .then((data) => {
+          console.log(data); 
+
+          const title = data.title.rendered;
+          const mainHeading = data.acf?.main_heading || "No Main Heading";
+          const description =
+            data.acf?.description || "No Description Available";
+          const bannerImage = data.acf?.banner_image_url || "";
+          const missionHeading =
+            data.acf?.our_mission_and_vission_section?.our_mission_heading ||
+            "No Mission Heading";
+          const missionDescriptions =
+            data.acf?.our_mission_and_vission_section
+              ?.our_mission_descriptions || [];
+          const accordionHeading =
+            data.acf?.accordion_section?.accordion_main_heading ||
+            "No Accordion Heading";
+          const accordionItems = data.acf?.accordion_section?.accordion || [];
+
+          document.getElementById("title").innerHTML = title;
+          document.getElementById("main-heading").innerHTML = mainHeading;
+          document.getElementById("description").innerHTML = description;
+
+          if (bannerImage) {
+            document.getElementById("banner-image").src = bannerImage;
+          }
+
+          document.getElementById("mission-heading").innerHTML = missionHeading;
+          document.getElementById("mission-description").innerHTML =
+            missionDescriptions
+              .map((item) => `<p>${item.our_mission_paragraph}</p>`)
+              .join("");
+
+          document.getElementById("accordion-heading").innerHTML =
+            accordionHeading;
+          document.getElementById("accordion").innerHTML = accordionItems
+            .map(
+              (item) => `
+                    <h3>${item.heading}</h3>
+                    <p>${item.description}</p>
+                `
+            )
+            .join("");
+
+          document.getElementById("loader").style.display = "none";
+          document.getElementById("content").style.display = "block";
+        })
+        .catch((error) => {
+          console.error("Error fetching data:", error);
+          document.getElementById("loader").innerHTML =
+            "Failed to load data. Please try again.";
+        });
+    </script>
+  </body>
+</html>
